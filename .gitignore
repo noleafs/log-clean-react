@@ -1,3 +1,7 @@
 # Project exclude paths
 /out/
 /src/preload/index.d.ts
+.idea
+dist
+node_modules
+out
