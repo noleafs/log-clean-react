@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { SettingOutlined, FileOutlined } from '@ant-design/icons';
+import { SettingOutlined, FileOutlined, ColumnWidthOutlined } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { Menu } from 'antd';
 import './index.css';
@@ -7,12 +7,12 @@ import { useNavigate } from 'react-router-dom';
 
 const items: MenuProps['items'] = [
   {
-    label: '文件',
-    key: 'file',
-    icon: <FileOutlined />,
+    key: 'config',
+    label: '配置中心',
+    icon: <SettingOutlined style={{fontSize: '28px', marginTop: '21px'}}/>,
     children: [
           {
-            label: '打开配置文件',
+            label: '配置清除目标',
             key: '/home',
           },
           {
@@ -21,33 +21,33 @@ const items: MenuProps['items'] = [
           },
     ],
   },
+
   {
-    label: '配置',
-    key: 'config',
-    icon: <SettingOutlined />,
-    children: [
-          {
-            label: 'Option 1',
-            key: 'setting:5',
-          },
-          {
-            label: 'Option 2',
-            key: 'setting:6',
-          },
-    ],
+    key: '/file',
+    label: '文件',
+    icon: <FileOutlined style={{fontSize: '28px', marginTop: '21px'}}/>,
   },
   {
-    label: (
-      <a href="https://ant.design" target="_blank" rel="noopener noreferrer">
-        跳转组件
-      </a>
-    ),
-    key: 'alipay',
-  },
+    label: '扩展',
+    title: '扩展',
+    key: 'extension',
+    icon: <ColumnWidthOutlined style={{fontSize: '28px', marginTop: '21px'}}/>,
+    disabled: true,
+    // children: [
+    //       {
+    //         label: 'Option 1',
+    //         key: 'setting:5',
+    //       },
+    //       {
+    //         label: 'Option 2',
+    //         key: 'setting:6',
+    //       },
+    // ],
+  }
 ];
 
 const MyMenu: React.FC = () => {
-  const [current, setCurrent] = useState('file');
+  const [current, setCurrent] = useState('/home');
   const navigate = useNavigate();
   const onClick: MenuProps['onClick'] = (e) => {
     const {key} = e;
@@ -56,7 +56,9 @@ const MyMenu: React.FC = () => {
     navigate(key)
   };
 
-  return <Menu onClick={onClick} selectedKeys={[current]} mode="horizontal" items={items} />;
+
+
+  return <Menu onClick={onClick} style={{height: '100%', paddingTop: '12px'}} selectedKeys={[current]} mode="inline" theme="light" items={items} />;
 };
 
 export default MyMenu;

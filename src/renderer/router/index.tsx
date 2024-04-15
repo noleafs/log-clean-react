@@ -1,6 +1,6 @@
 import React, { Suspense, useEffect } from 'react'
 import { antdUtils } from '../utils/antd'
-import { App, Layout, Skeleton } from 'antd'
+import { App, Skeleton } from 'antd'
 import { useRoutes } from 'react-router-dom'
 const lazyLoad = (moduleName: string) => {
   const viteModule = import.meta.glob('../**/*.tsx')
@@ -22,7 +22,7 @@ const lazyLoad = (moduleName: string) => {
 const routes = [
   {
     path: '/',
-    component: React.lazy(() => import('@/renderer/layouts')),
+    component: lazyLoad('layouts').type,
     children: [
       {
         path: '/timer',
@@ -31,6 +31,10 @@ const routes = [
       {
         path: '/home',
         component: lazyLoad('Home').type
+      },
+      {
+        path: '/file',
+        component: lazyLoad('File').type
       },
       {
         path: '*',

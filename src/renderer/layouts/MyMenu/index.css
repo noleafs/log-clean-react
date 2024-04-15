@@ -6,3 +6,13 @@
     height: 35px;
     line-height: 35px;
 }
+
+.ant-menu-inline-collapsed >.ant-menu-submenu>.ant-menu-submenu-title {
+    padding-inline: calc(50% - 20px);
+    height: 64px;
+}
+
+.ant-menu-inline-collapsed >.ant-menu-item {
+    padding-inline: calc(50% - 20px);
+    height: 64px;
+}

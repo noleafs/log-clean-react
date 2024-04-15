@@ -12,7 +12,7 @@ function createWindow(): BrowserWindow {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
     width: 900,
-    height: 670,
+    height: 570,
     show: false,
     autoHideMenuBar: true,
     icon,
@@ -62,11 +62,12 @@ app.whenReady().then(() => {
   // IPC test
   ipcMain.on('ping', () => console.log('pong'))
   ipcMain.on('message', (event, arg) => {
-    // 收到发送过来的消息后，去读取对应文件夹下的文件
-    console.log(arg)
-    traverseFolder(arg)
+    // 收到发送过来的消息后，去读取对应文件夹下的文件，配置文件的地址为
+    const param = JSON.parse(arg);
+    console.log(param)
+    // traverseFolder(arg)
 
-    event.sender.send('renderer-message', '2323423')
+    // event.sender.send('renderer-message', '2323423')
   })
 
   // @ts-ignore
