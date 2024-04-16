@@ -7,8 +7,8 @@ const Layouts: React.FC = () => {
   return (
     <>
     <Flex gap="middle" vertical={false} style={{height: '100%'}}>
-      <Layout>
-        <Layout.Sider collapsed>
+      <Layout style={{backgroundColor: '#efeeee'}}>
+        <Layout.Sider style={{backgroundColor: '#ffffff', padding: '10px 0'}}>
           <MyMenu/>
         </Layout.Sider>
         <Layout.Content className="dis-fl fd-c"

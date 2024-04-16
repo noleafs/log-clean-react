@@ -1,64 +1,87 @@
-import React, { useState } from 'react';
-import { SettingOutlined, FileOutlined, ColumnWidthOutlined } from '@ant-design/icons';
-import type { MenuProps } from 'antd';
-import { Menu } from 'antd';
-import './index.css';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from 'react'
+import {
+  SettingOutlined,
+  FileOutlined,
+  ColumnWidthOutlined,
+  AppstoreAddOutlined,
+  FieldTimeOutlined,
+  SearchOutlined,
+  AppstoreOutlined
+} from '@ant-design/icons'
+import type { MenuProps } from 'antd'
+import { Input, Menu } from 'antd'
+import './index.css'
+import { useNavigate } from 'react-router-dom'
 
 const items: MenuProps['items'] = [
   {
-    key: 'config',
-    label: '配置中心',
-    icon: <SettingOutlined style={{fontSize: '28px', marginTop: '21px'}}/>,
-    children: [
-          {
-            label: '配置清除目标',
-            key: '/home',
-          },
-          {
-            label: '配置定时计划',
-            key: '/timer',
-          },
-    ],
+    key: '/timer',
+    label: '定时计划',
+    icon: <FieldTimeOutlined />
   },
-
+  {
+    key: '/target',
+    label: '清除目标',
+    icon: <SettingOutlined />
+  },
+  {
+    key: '/dashbord',
+    label: '工作台',
+    icon: <AppstoreOutlined />
+  },
   {
     key: '/file',
     label: '文件',
-    icon: <FileOutlined style={{fontSize: '28px', marginTop: '21px'}}/>,
+    icon: <FileOutlined />
   },
   {
     label: '扩展',
     title: '扩展',
     key: 'extension',
-    icon: <ColumnWidthOutlined style={{fontSize: '28px', marginTop: '21px'}}/>,
-    disabled: true,
-    // children: [
-    //       {
-    //         label: 'Option 1',
-    //         key: 'setting:5',
-    //       },
-    //       {
-    //         label: 'Option 2',
-    //         key: 'setting:6',
-    //       },
-    // ],
+    icon: <ColumnWidthOutlined />,
+    disabled: true
+  },
+  {
+    label: '更多',
+    title: '更多',
+    key: 'more',
+    icon: <AppstoreAddOutlined />
   }
-];
+]
 
 const MyMenu: React.FC = () => {
-  const [current, setCurrent] = useState('/home');
-  const navigate = useNavigate();
+  const [current, setCurrent] = useState('/timer')
+  const navigate = useNavigate()
   const onClick: MenuProps['onClick'] = (e) => {
-    const {key} = e;
+    const { key } = e
 
-    setCurrent(e.key);
+    setCurrent(e.key)
     navigate(key)
-  };
+  }
 
+  return (
+    <>
+      <Input
+        prefix={<SearchOutlined />}
+        placeholder="搜索（敬请期待）"
+        style={{
+          width: 'calc(100% - 40px)',
+          margin: '6px auto',
+          display: 'flex',
+          backgroundColor: '#efeeee'
+        }}
+        disabled
+      />
+      <Menu
+        onClick={onClick}
+        style={{ height: '100%', paddingTop: '12px' }}
+        selectedKeys={[current]}
+        mode="inline"
+        theme="light"
+        items={items}
+      />
+    </>
+  )
+}
 
-
-  return <Menu onClick={onClick} style={{height: '100%', paddingTop: '12px'}} selectedKeys={[current]} mode="inline" theme="light" items={items} />;
-};
-
-export default MyMenu;
+export default MyMenu

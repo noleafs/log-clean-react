@@ -2491,6 +2491,11 @@ punycode@^2.1.0:
   resolved "https://registry.npmmirror.com/punycode/-/punycode-2.3.1.tgz"
   integrity sha512-vYt7UD1U9Wg6138shLtLOvdAu+8DsC/ilFtEVHcH+wydcSpNE20AfSOduf6MkRFahL5FY7X1oU7nKVZFtfq8Fg==
 
+qnn-react-cron@^1.2.6:
+  version "1.2.6"
+  resolved "https://registry.npmmirror.com/qnn-react-cron/-/qnn-react-cron-1.2.6.tgz#bb0d97d01891c283abacd79df233d383c4386ca3"
+  integrity sha512-em+1ZPBQZ3hq6C19kXXa4yVjefvTPaSy8JOUMyITeZb2sThoQSrj49qKlt1h3maB70VRDP2h/KLqrfmyO1z6Ew==
+
 qrcode.react@^3.1.0:
   version "3.1.0"
   resolved "https://registry.npmmirror.com/qrcode.react/-/qrcode.react-3.1.0.tgz"

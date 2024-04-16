@@ -29,8 +29,8 @@ const routes = [
         component: lazyLoad('Timer').type
       },
       {
-        path: '/home',
-        component: lazyLoad('Home').type
+        path: '/target',
+        component: lazyLoad('Target').type
       },
       {
         path: '/file',
@@ -38,7 +38,7 @@ const routes = [
       },
       {
         path: '*',
-        component: lazyLoad('Home').type
+        component: lazyLoad('404').type
       },
     ]
   }

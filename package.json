@@ -25,7 +25,8 @@
     "@electron-toolkit/utils": "^3.0.0",
     "antd": "^5.16.1",
     "electron-updater": "^6.1.7",
-    "node-schedule": "^2.1.1"
+    "node-schedule": "^2.1.1",
+    "qnn-react-cron": "^1.2.6"
   },
   "devDependencies": {
     "@electron-toolkit/tsconfig": "^1.0.1",

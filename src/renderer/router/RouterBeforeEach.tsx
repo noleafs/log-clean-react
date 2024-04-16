@@ -4,7 +4,7 @@ import React, {useEffect} from 'react'
 const RouterBeforeEach: React.FC = () => {
   const navigate = useNavigate();
   useEffect(() => {
-    navigate("/home");
+    navigate("/timer");
   }, [])
   return <Outlet/>
 }
