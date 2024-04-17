@@ -1,0 +1,25 @@
+.self-scroll::-webkit-scrollbar {
+  width: 8px;
+  height: 1px;
+}
+
+.self-scroll::-webkit-scrollbar-thumb {
+  /*滚动条里面小方块*/
+  border-radius: 8px;
+  background-color: skyblue;
+  background-image: -webkit-linear-gradient(
+    45deg,
+    rgba(255, 255, 255, 0.2) 25%,
+    transparent 25%,
+    transparent 50%,
+    rgba(255, 255, 255, 0.2) 50%,
+    rgba(255, 255, 255, 0.2) 75%,
+    transparent 75%,
+    transparent
+  );
+}
+
+.self-scroll::-webkit-scrollbar-track {
+  /*滚动条里面轨道*/
+  background: transparent;
+}

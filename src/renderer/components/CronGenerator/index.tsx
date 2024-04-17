@@ -6,8 +6,8 @@ import { Button } from 'antd'
  * @returns
  */
 const CronGenerator: React.FC = () => {
-  let cronFns
-  let [value, setValue] = useState<string>('0,20,14,26 * * * * ? *')
+  let cronFns: any
+  let [value, setValue] = useState<string>('? ? 0,12 ? * ? ?')
 
   return (
     <>

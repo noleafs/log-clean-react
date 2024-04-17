@@ -2,6 +2,7 @@ import { Flex, Layout, Spin } from 'antd'
 import React, { Suspense } from 'react'
 import RouterBeforeEach from '../router/RouterBeforeEach'
 import MyMenu from './MyMenu'
+import './layout.css'
 
 const Layouts: React.FC = () => {
   return (
@@ -11,7 +12,7 @@ const Layouts: React.FC = () => {
         <Layout.Sider style={{backgroundColor: '#ffffff', padding: '10px 0'}}>
           <MyMenu/>
         </Layout.Sider>
-        <Layout.Content className="dis-fl fd-c"
+        <Layout.Content className="dis-fl fd-c self-scroll"
                         style={{
                           overflowY: 'auto',
                           overflowX: 'hidden',

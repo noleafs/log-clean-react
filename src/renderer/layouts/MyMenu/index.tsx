@@ -1,9 +1,7 @@
 import React, { useState } from 'react'
 import {
   SettingOutlined,
-  FileOutlined,
   ColumnWidthOutlined,
-  AppstoreAddOutlined,
   FieldTimeOutlined,
   SearchOutlined,
   AppstoreOutlined
@@ -16,36 +14,24 @@ import { useNavigate } from 'react-router-dom'
 const items: MenuProps['items'] = [
   {
     key: '/timer',
-    label: '定时计划',
+    label: '日志配置',
     icon: <FieldTimeOutlined />
   },
   {
-    key: '/target',
-    label: '清除目标',
-    icon: <SettingOutlined />
+    key: '/exception',
+    label: '日志异常分析',
+    icon: <ColumnWidthOutlined />
   },
   {
-    key: '/dashbord',
-    label: '工作台',
+    key: '/dashboard',
+    label: '软件更新',
     icon: <AppstoreOutlined />
-  },
-  {
-    key: '/file',
-    label: '文件',
-    icon: <FileOutlined />
-  },
-  {
-    label: '扩展',
-    title: '扩展',
-    key: 'extension',
-    icon: <ColumnWidthOutlined />,
-    disabled: true
   },
   {
     label: '更多',
     title: '更多',
     key: 'more',
-    icon: <AppstoreAddOutlined />
+    icon: <SettingOutlined />
   }
 ]
 

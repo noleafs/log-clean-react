@@ -11,7 +11,7 @@ let job: schedule.Job
 function createWindow(): BrowserWindow {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    width: 960,
+    width: 1150,
     height: 700,
     show: false,
     autoHideMenuBar: true,
