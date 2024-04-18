@@ -23,7 +23,7 @@ const items: MenuProps['items'] = [
     icon: <ColumnWidthOutlined />
   },
   {
-    key: '/dashboard',
+    key: '/updater',
     label: '软件更新',
     icon: <AppstoreOutlined />
   },

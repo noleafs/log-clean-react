@@ -29,12 +29,8 @@ const routes = [
         component: lazyLoad('Timer').type
       },
       {
-        path: '/target',
-        component: lazyLoad('Target').type
-      },
-      {
-        path: '/file',
-        component: lazyLoad('File').type
+        path: '/updater',
+        component: lazyLoad('Updater').type
       },
       {
         path: '*',

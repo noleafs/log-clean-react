@@ -1,7 +1,11 @@
 import React, { useContext, useEffect, useRef, useState } from 'react'
-import { Checkbox, GetRef, InputRef, Select, Space } from 'antd'
+import { Checkbox, DatePicker, GetRef, InputRef, Select, Space } from 'antd'
 import { Button, Form, Input, Popconfirm, Table } from 'antd'
 import { PlusOutlined, SaveOutlined } from '@ant-design/icons'
+import { antdUtils } from '@/renderer/utils/antd'
+import dayjs from 'dayjs'
+// 发送消息的
+const { ipcRenderer } = window.electron
 
 type FormInstance<T> = GetRef<typeof Form<T>>;
 
@@ -11,12 +15,16 @@ interface Item {
   key: string;
   logPath: string;
   saveTime: string;
+  datetime?: string;
   containDir: boolean;
 }
 
 interface EditableRowProps {
   index: number;
 }
+
+// 日期格式
+const dateFormat = 'YYYY-MM-DD'
 
 const EditableRow: React.FC<EditableRowProps> = ({ index, ...props }) => {
   const [form] = Form.useForm()
@@ -94,6 +102,25 @@ const EditableCell: React.FC<EditableCellProps> = ({
   }
 
   let childNode = children
+  let input: React.ReactNode | string
+  switch (inputType) {
+    case 'text':
+      input = <Input ref={inputRef} onPressEnter={save} onBlur={save} />
+      break
+    case 'select':
+      input = <Select onChange={save} options={options} />
+      break
+    case 'datetime':
+      input = <DatePicker value={dayjs(record.datetime, dateFormat)} maxDate={dayjs(record.datetime, dateFormat)}
+                          onChange={save} />
+      break
+    case 'checkbox':
+      input = <Checkbox defaultChecked={record.containDir} onChange={save} />
+      break
+    default:
+      input = ''
+      break
+  }
 
   if (editable) {
     childNode = editing ? (
@@ -108,11 +135,7 @@ const EditableCell: React.FC<EditableCellProps> = ({
           }
         ]}
       >
-        {
-          inputType === 'text' ? <Input value={record.logPath} ref={inputRef} onPressEnter={save} onBlur={save} /> :
-            (inputType === 'select' ? <Select value={record.logPath} onChange={save} options={options} /> :
-              <Checkbox defaultChecked={record.containDir} onChange={save} />)
-        }
+        {input}
       </Form.Item>
     ) : (
       <div className="editable-cell-value-wrap" style={{ paddingRight: 24 }} onClick={toggleEdit}>
@@ -130,17 +153,39 @@ interface DataType {
   key: React.Key;
   logPath: string;
   saveTime: string;
+  datetime?: string;
   containDir: boolean;
 }
 
 type ColumnTypes = Exclude<EditableTableProps['columns'], undefined>;
 
 const FileTable: React.FC = () => {
+
+  useEffect(() => {
+    // 当前组件绑定接受主进程发送过来的配置信息读取
+    ipcRenderer.on('config-loaded', (_event, arg) => {
+      const logConfig = arg['logConfig']
+      setDataSource(logConfig)
+    })
+    // 监听主进程发送过来的保存配置的结果
+    ipcRenderer.on('save_result', (_event, arg) => {
+      // 提示保存成或失败
+      if (arg['success']) {
+        antdUtils.message?.success('保存成功')
+      } else {
+        antdUtils.message?.error('保存失败！原因：' + arg['err'])
+      }
+    })
+    // 向主进发送消息，去获取配置信息
+    ipcRenderer.send('config-loaded')
+  }, [])
+
   const [dataSource, setDataSource] = useState<DataType[]>([
     {
       key: '0',
       logPath: '日志文件路径',
       saveTime: '1',
+      datetime: '2024-04-18',
       containDir: true
     }
   ])
@@ -164,16 +209,25 @@ const FileTable: React.FC = () => {
     {
       title: '保留时长',
       dataIndex: 'saveTime',
-      width: '20%',
+      width: '15%',
       editable: true,
       inputType: 'select',
       render: (_, record) =>
         <span>{record.saveTime === '1' ? '近30天' : '近15天'}</span>
     },
     {
+      title: '时长',
+      dataIndex: 'datetime',
+      width: '20%',
+      editable: true,
+      inputType: 'datetime',
+      render: (_, record) =>
+        <DatePicker />
+    },
+    {
       title: '包含子文件夹',
       dataIndex: 'containDir',
-      width: '20%',
+      width: '10%',
       editable: true,
       inputType: 'checkbox',
       render: (_, record) =>
@@ -197,12 +251,17 @@ const FileTable: React.FC = () => {
       key: count,
       logPath: `日志文件路径`,
       saveTime: '1',
+      datetime: '2024-04-18',
       containDir: true
     }
     setDataSource([...dataSource, newData])
     setCount(count + 1)
   }
 
+  /**
+   * 新增数据后的操作
+   * @param row
+   */
   const handleSave = (row: DataType) => {
     const newData = [...dataSource]
     const index = newData.findIndex((item) => row.key === item.key)
@@ -212,6 +271,18 @@ const FileTable: React.FC = () => {
       ...row
     })
     setDataSource(newData)
+  }
+
+  /**
+   * 保存配置
+   */
+  const saveConfig = () => {
+    const json = {
+      timer: '0 * * * * ? *',
+      logConfig: dataSource
+    }
+    // 向主进程发送待存储的数据
+    ipcRenderer.send('save-config', json)
   }
 
   const components = {
@@ -244,9 +315,7 @@ const FileTable: React.FC = () => {
         <Button onClick={handleAdd} type="primary" style={{ marginBottom: 16 }} icon={<PlusOutlined />}>
           新增
         </Button>
-        <Button onClick={() => {
-          console.log(dataSource)
-        }} type="primary" style={{ marginBottom: 16 }} icon={<SaveOutlined />}>
+        <Button onClick={saveConfig} type="primary" style={{ marginBottom: 16 }} icon={<SaveOutlined />}>
           存储
         </Button>
       </Space>

@@ -15,8 +15,8 @@ function createWindow(): BrowserWindow {
     height: 700,
     show: false,
     autoHideMenuBar: true,
-    icon,
-    // ...(process.platform === 'linux' ? { icon } : {}),
+    // icon: path.join(__dirname, './resource/icon.png'),
+    ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
       contextIsolation: true,
       preload: join(__dirname, '../preload/index.js'),
@@ -61,23 +61,36 @@ app.whenReady().then(() => {
 
   // IPC test
   ipcMain.on('ping', () => console.log('pong'))
-  ipcMain.on('message', (event, arg) => {
+  ipcMain.on('message', (_event, arg) => {
     // 收到发送过来的消息后，去读取对应文件夹下的文件，配置文件的地址为
-    const param = JSON.parse(arg);
+    const param = JSON.parse(arg)
     console.log(param)
     // traverseFolder(arg)
 
     // event.sender.send('renderer-message', '2323423')
   })
 
-  // @ts-ignore
+  // 接收渲染进程发送的存储配置信息的消息
+  ipcMain.on('save-config', (_event, config) => {
+    const result = saveConfig(config);
+    // 将写入结果回传给渲染进程
+    mainWindow.webContents.send('save_result', result);
+  })
+
+  // 接收渲染进程发送的获取配置
+  ipcMain.on('config-loaded', (_event, _config) => {
+    // 读取配置信息并发送到渲染进程
+    const param = loadConfig()
+    mainWindow.webContents.send('config-loaded', param)
+  })
+
   const mainWindow = createWindow()
 
   // job = schedule.scheduleJob('0/2 * * * * ?', () => {
   //   console.log('指定定时任务')
   //   mainWindow.webContents.send('renderer-message', '这是主进程发送的消息，执行定时任务')
   // })
-  app.on('activate', function () {
+  app.on('activate', function() {
     // On macOS it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
@@ -97,6 +110,7 @@ app.on('window-all-closed', () => {
 })
 
 // 定义一个函数用于遍历文件夹
+// @ts-ignore
 function traverseFolder(folderPath: string): void {
   // 读取文件夹下所有文件
   fs.readdir(folderPath, (err, files) => {
@@ -162,6 +176,47 @@ function isFolderEmpty(folderPath: string): boolean {
 
   // 如果文件数组的长度为 0，则文件夹为空
   return files.length === 0
+}
+
+/**
+ * 保存配置信息到文件
+ * @param config
+ */
+function saveConfig(config: {}): any {
+  const configPath = path.join(app.getPath('userData'), 'config.json')
+  try {
+    fs.writeFileSync(configPath, JSON.stringify(config), 'utf-8')
+    return { success: true }
+  } catch (err) {
+    return { success: false, err }
+  }
+}
+
+/**
+ * 从配置文件读取配置信息
+ */
+function loadConfig() {
+  const configPath = path.join(app.getPath('userData'), 'config.json')
+  try {
+    const data = fs.readFileSync(configPath, 'utf-8')
+    return JSON.parse(data)
+  } catch (error) {
+    // 生成一个默认的配置文件
+    const defaultConfig = {
+      timer: '0 * * * * ? *',
+      logConfig: [
+        {
+          key: '0',
+          logPath: '/home/ycl/testDelete',
+          saveTime: '1',
+          datetime: '2024-04-18',
+          containDir: true
+        }
+      ]
+    }
+    saveConfig(defaultConfig)
+    return defaultConfig
+  }
 }
 
 // In this file you can include the rest of your app"s specific main process
