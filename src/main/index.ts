@@ -1,10 +1,13 @@
-import { app, shell, BrowserWindow, ipcMain } from 'electron'
+import { app, shell, BrowserWindow, ipcMain, dialog } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import fs from 'fs'
 import path from 'path'
 import schedule from 'node-schedule'
+import moment from 'moment'
+import { autoUpdater } from 'electron-updater'
+
 // 定时任务对象实例
 let job: schedule.Job
 
@@ -72,9 +75,9 @@ app.whenReady().then(() => {
 
   // 接收渲染进程发送的存储配置信息的消息
   ipcMain.on('save-config', (_event, config) => {
-    const result = saveConfig(config);
+    const result = saveConfig(config)
     // 将写入结果回传给渲染进程
-    mainWindow.webContents.send('save_result', result);
+    mainWindow.webContents.send('save_result', result)
   })
 
   // 接收渲染进程发送的获取配置
@@ -85,11 +88,11 @@ app.whenReady().then(() => {
   })
 
   const mainWindow = createWindow()
+  // 读取配置文件中的内容
+  let config = loadConfig()
+  job = schedule.scheduleJob(config.timer, scheduleJob(config))
 
-  // job = schedule.scheduleJob('0/2 * * * * ?', () => {
-  //   console.log('指定定时任务')
-  //   mainWindow.webContents.send('renderer-message', '这是主进程发送的消息，执行定时任务')
-  // })
+
   app.on('activate', function() {
     // On macOS it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.
@@ -109,17 +112,64 @@ app.on('window-all-closed', () => {
   }
 })
 
-// 定义一个函数用于遍历文件夹
+// 构建配置自动更新
+app.on('ready', () => {
+  // 禁止自动更新，以便用户控制下载时机
+  autoUpdater.autoDownload = false
+  // 检查更新
+  autoUpdater.checkForUpdatesAndNotify()
+
+  // 当发现新版本
+  autoUpdater.on('update-available', () => {
+    dialog.showMessageBox({
+      type: 'info',
+      title: '发现新版本',
+      message: '发现新版本，是否立即下载更新？',
+      buttons: ['是', '否']
+    }).then((result) => {
+      if (result.response === 0) {
+        // 下载更新
+        autoUpdater.downloadUpdate()
+      }
+    })
+  })
+  // 当更新下载完成
+  autoUpdater.on('update-downloaded', () => {
+    dialog.showMessageBox({
+      type: 'info',
+      title: '更新下载完成',
+      message: '更新下载完成，是否立即安装并重启？',
+      buttons: ['是', '否']
+    }).then((result) => {
+      if (result.response === 0) {
+        // 安装并重启
+        autoUpdater.quitAndInstall()
+      }
+    })
+  })
+
+})
+
+/**
+ * 定义一个函数用于遍历文件夹，并比较其创建时间，判定存留的时间
+ * @param folderPath 文件夹路径
+ * @param containsSubFolder 包含子文件夹
+ * @param saveTime 存留时间
+ */
 // @ts-ignore
-function traverseFolder(folderPath: string): void {
+function traverseFolder(folderPath: string, containsSubFolder = true, saveTime: string): void {
   // 读取文件夹下所有文件
   fs.readdir(folderPath, (err, files) => {
     if (err) {
-      console.error('Error reading folder:', err)
+      console.error('读取文件夹失败:', err)
       return
     }
     if (files.length === 0) {
-      console.log('空文件夹，进行删除，路径为：', folderPath)
+      fs.rmdir(folderPath, (err) => {
+        if (err) {
+          console.error(err)
+        }
+      })
     }
     // 遍历文件数组
     files.forEach((file) => {
@@ -131,9 +181,9 @@ function traverseFolder(folderPath: string): void {
           return
         }
 
-        if (stats.isDirectory()) {
+        if (stats.isDirectory() && containsSubFolder) {
           // 如果是文件夹，则递归遍历文件夹
-          traverseFolder(filePath)
+          traverseFolder(filePath, containsSubFolder, saveTime)
         } else {
           // 如果是文件，则获取文件创建日期和文件名称， 通过创建时间计算比如说好多天之前的文件进行删除
           const createDate = stats.birthtime
@@ -145,10 +195,13 @@ function traverseFolder(folderPath: string): void {
               console.log('删除文件失败，路径', filePath, '失败原因：', err)
               return
             }
-            console.log('文件删除成功')
-            // 这里调用文件删除，删除文件后，判定当前文件夹是否是空文件夹
+            // 删除文件后，判定当前文件夹是否是空文件夹
             if (isFolderEmpty(folderPath)) {
-              console.log('删除当前文件夹，文件夹路径为：', folderPath)
+              fs.rmdir(folderPath, (err) => {
+                if (err) {
+                  console.error(err)
+                }
+              })
             }
           })
         }
@@ -182,10 +235,18 @@ function isFolderEmpty(folderPath: string): boolean {
  * 保存配置信息到文件
  * @param config
  */
-function saveConfig(config: {}): any {
+function saveConfig(config: any): any {
   const configPath = path.join(app.getPath('userData'), 'config.json')
   try {
     fs.writeFileSync(configPath, JSON.stringify(config), 'utf-8')
+    // 重新开始新的定时任务
+    if (job) {
+      job.cancel()
+    }
+    // 重新开启任务
+    job = schedule.scheduleJob(config.timer, () => {
+
+    })
     return { success: true }
   } catch (err) {
     return { success: false, err }
@@ -209,13 +270,38 @@ function loadConfig() {
           key: '0',
           logPath: '/home/ycl/testDelete',
           saveTime: '1',
-          datetime: '2024-04-18',
+          // 默认当前时间
+          datetime: moment().format('YYYY-MM-DD'),
           containDir: true
         }
       ]
     }
     saveConfig(defaultConfig)
     return defaultConfig
+  }
+}
+
+
+/**
+ * 待执行的任务
+ * @param config
+ */
+function scheduleJob(config: any) {
+  return () => {
+    if (config && config.timer && config.logConfig && config.logConfig.length > 0) {
+
+      job = schedule.scheduleJob(config.timer, () => {
+        // 需要执行的定时任务，根据配置删除指定文件夹下的内容
+        for (let i = -0, len = config.logConfig.length; i < len; i++) {
+          const cfg = config.logConfig[i]
+          // 获取配置的日志路劲、保留时长、时间、是否包含子文件夹
+          const { logPath, saveTime, datetime, containDir } = cfg
+          // 需要将时间进行转换
+
+
+        }
+      })
+    }
   }
 }
 

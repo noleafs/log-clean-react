@@ -4,6 +4,7 @@ import { Button, Form, Input, Popconfirm, Table } from 'antd'
 import { PlusOutlined, SaveOutlined } from '@ant-design/icons'
 import { antdUtils } from '@/renderer/utils/antd'
 import dayjs from 'dayjs'
+import moment from 'moment'
 // 发送消息的
 const { ipcRenderer } = window.electron
 
@@ -69,6 +70,11 @@ const EditableCell: React.FC<EditableCellProps> = ({
 
   const toggleEdit = () => {
     setEditing(!editing)
+    // 这里需要判定时间格式
+    if (dataIndex === 'datetime') {
+      form.setFieldsValue({ [dataIndex]: dayjs(record[dataIndex], dateFormat) })
+      return
+    }
     form.setFieldsValue({ [dataIndex]: record[dataIndex] })
   }
 
@@ -82,8 +88,12 @@ const EditableCell: React.FC<EditableCellProps> = ({
       value: '2'
     },
     {
-      label: '其他',
+      label: '近一周',
       value: '3'
+    },
+    {
+      label: '自定义',
+      value: '4'
     }
   ]
 
@@ -96,9 +106,48 @@ const EditableCell: React.FC<EditableCellProps> = ({
 
       toggleEdit()
       handleSave({ ...record, ...values })
+      // 判定如果选择的是最近多长时间的，则将时间设置到数据列中去
+      if (dataIndex === 'saveTime' && values['saveTime'] !== '4') {
+        const saveTime = values['saveTime']
+        const current = moment()
+        let value = ''
+        switch (saveTime) {
+          case '1':
+            value = current.subtract(30, 'days').format(dateFormat)
+            break
+          case '2':
+            value = current.subtract(15, 'days').format(dateFormat)
+            break
+          case '3':
+            value = current.subtract(7, 'days').format(dateFormat)
+            break
+        }
+        if (value !== '') {
+          handleSave({ ...record, ...values, ...{ datetime: value } })
+        }
+      }
     } catch (errInfo) {
       console.log('Save failed:', errInfo)
     }
+  }
+
+  /**
+   * 时间切换
+   * @param _dayjs
+   * @param dateStr
+   */
+  const datetimeChange = (_dayjs: any, dateStr: any) => {
+    toggleEdit()
+    handleSave({ ...record, ...{ datetime: dateStr } })
+  }
+
+  /**
+   * 禁止的日期
+   * @param current
+   */
+  const disableDate = (current: any) => {
+    // 禁止选择当前日期之后的日期
+    return current && current > moment().endOf('day')
   }
 
   let childNode = children
@@ -111,8 +160,9 @@ const EditableCell: React.FC<EditableCellProps> = ({
       input = <Select onChange={save} options={options} />
       break
     case 'datetime':
-      input = <DatePicker value={dayjs(record.datetime, dateFormat)} maxDate={dayjs(record.datetime, dateFormat)}
-                          onChange={save} />
+      input = <DatePicker disabled={record.saveTime != '4'}
+                          disabledDate={disableDate}
+                          onChange={datetimeChange} allowClear={false} />
       break
     case 'checkbox':
       input = <Checkbox defaultChecked={record.containDir} onChange={save} />
@@ -159,7 +209,12 @@ interface DataType {
 
 type ColumnTypes = Exclude<EditableTableProps['columns'], undefined>;
 
-const FileTable: React.FC = () => {
+type FileTableProps = {
+  onSave: (date: any) => void;
+}
+
+const FileTable: React.FC<FileTableProps> = (props: FileTableProps) => {
+  const { onSave } = props
 
   useEffect(() => {
     // 当前组件绑定接受主进程发送过来的配置信息读取
@@ -171,9 +226,9 @@ const FileTable: React.FC = () => {
     ipcRenderer.on('save_result', (_event, arg) => {
       // 提示保存成或失败
       if (arg['success']) {
-        antdUtils.message?.success('保存成功')
+        antdUtils.message?.success('配置保存成功')
       } else {
-        antdUtils.message?.error('保存失败！原因：' + arg['err'])
+        antdUtils.message?.error('配置保存失败！原因：' + arg['err'])
       }
     })
     // 向主进发送消息，去获取配置信息
@@ -213,16 +268,14 @@ const FileTable: React.FC = () => {
       editable: true,
       inputType: 'select',
       render: (_, record) =>
-        <span>{record.saveTime === '1' ? '近30天' : '近15天'}</span>
+        <span>{record.saveTime === '1' ? '近30天' : (record.saveTime === '2' ? '近15天' : (record.saveTime === '3' ? '近一周' : '自定义'))}</span>
     },
     {
       title: '时长',
       dataIndex: 'datetime',
       width: '20%',
       editable: true,
-      inputType: 'datetime',
-      render: (_, record) =>
-        <DatePicker />
+      inputType: 'datetime'
     },
     {
       title: '包含子文件夹',
@@ -273,17 +326,6 @@ const FileTable: React.FC = () => {
     setDataSource(newData)
   }
 
-  /**
-   * 保存配置
-   */
-  const saveConfig = () => {
-    const json = {
-      timer: '0 * * * * ? *',
-      logConfig: dataSource
-    }
-    // 向主进程发送待存储的数据
-    ipcRenderer.send('save-config', json)
-  }
 
   const components = {
     body: {
@@ -315,7 +357,8 @@ const FileTable: React.FC = () => {
         <Button onClick={handleAdd} type="primary" style={{ marginBottom: 16 }} icon={<PlusOutlined />}>
           新增
         </Button>
-        <Button onClick={saveConfig} type="primary" style={{ marginBottom: 16 }} icon={<SaveOutlined />}>
+        <Button onClick={() => onSave(dataSource)} type="primary" style={{ marginBottom: 16 }}
+                icon={<SaveOutlined />}>
           存储
         </Button>
       </Space>
