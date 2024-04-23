@@ -286,6 +286,7 @@ function loadConfig() {
  */
 function scheduleJob(config: any) {
   return () => {
+    console.log('执行了一次定时任务，执行时间是：', new Date())
     if (config && config.timer && config.logConfig && config.logConfig.length > 0) {
       // 需要执行的定时任务，根据配置删除指定文件夹下的内容
       for (let i = 0, len = config.logConfig.length; i < len; i++) {
