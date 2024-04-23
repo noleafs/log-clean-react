@@ -244,9 +244,7 @@ function saveConfig(config: any): any {
       job.cancel()
     }
     // 重新开启任务
-    job = schedule.scheduleJob(config.timer, () => {
-
-    })
+    job = schedule.scheduleJob(config.timer, scheduleJob(config))
     return { success: true }
   } catch (err) {
     return { success: false, err }
@@ -289,18 +287,15 @@ function loadConfig() {
 function scheduleJob(config: any) {
   return () => {
     if (config && config.timer && config.logConfig && config.logConfig.length > 0) {
+      // 需要执行的定时任务，根据配置删除指定文件夹下的内容
+      for (let i = 0, len = config.logConfig.length; i < len; i++) {
+        const cfg = config.logConfig[i]
+        // 获取配置的日志路劲、保留时长、时间、是否包含子文件夹
+        const { logPath, datetime, containDir } = cfg
+        // 需要将时间进行转换
+        traverseFolder(logPath, containDir, datetime)
 
-      job = schedule.scheduleJob(config.timer, () => {
-        // 需要执行的定时任务，根据配置删除指定文件夹下的内容
-        for (let i = 0, len = config.logConfig.length; i < len; i++) {
-          const cfg = config.logConfig[i]
-          // 获取配置的日志路劲、保留时长、时间、是否包含子文件夹
-          const { logPath, datetime, containDir } = cfg
-          // 需要将时间进行转换
-          traverseFolder(logPath, containDir, datetime)
-
-        }
-      })
+      }
     }
   }
 }
