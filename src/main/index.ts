@@ -264,7 +264,7 @@ function loadConfig() {
   } catch (error) {
     // 生成一个默认的配置文件
     const defaultConfig = {
-      timer: '0 * * * * ? *',
+      timer: '? ? 0 * * ? *',
       logConfig: [
         {
           key: '0',
@@ -292,12 +292,12 @@ function scheduleJob(config: any) {
 
       job = schedule.scheduleJob(config.timer, () => {
         // 需要执行的定时任务，根据配置删除指定文件夹下的内容
-        for (let i = -0, len = config.logConfig.length; i < len; i++) {
+        for (let i = 0, len = config.logConfig.length; i < len; i++) {
           const cfg = config.logConfig[i]
           // 获取配置的日志路劲、保留时长、时间、是否包含子文件夹
-          const { logPath, saveTime, datetime, containDir } = cfg
+          const { logPath, datetime, containDir } = cfg
           // 需要将时间进行转换
-
+          traverseFolder(logPath, containDir, datetime)
 
         }
       })

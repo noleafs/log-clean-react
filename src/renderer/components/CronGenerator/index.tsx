@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 import QnnReactCron from 'qnn-react-cron'
 import { Button } from 'antd'
 
@@ -9,39 +9,30 @@ import { Button } from 'antd'
 
 interface ICronGeneratorProps {
   cronText?: string;
+  setCronText: (text: string) => void;
 }
 
-const { ipcRenderer } = window.electron
-
-const CronGenerator: React.FC<ICronGeneratorProps> = ({}) => {
+const CronGenerator: React.FC<ICronGeneratorProps> = (props) => {
   let cronFns: any
-  let [value, setValue] = useState<string>('')
-  useEffect(() => {
-    ipcRenderer.on('config-loaded', (_event, arg) => {
-      const timer = arg['timer']
-      setValue(timer)
-      console.log('渲染进程收到的消息', arg)
-    })
-    // 向主进程发送消息，请求获取定时计划的配置信息
-    ipcRenderer.send('message', JSON.stringify({ command: 'getConfigFile' }))
-  }, [])
+  const { cronText, setCronText } = props
   return (
     <>
-      <div style={{ textAlign: 'center', margin: '0 0 12px 0' }}>Cron表达式： {value}</div>
+      <div style={{ textAlign: 'center', margin: '0 0 12px 0' }}>Cron表达式： {cronText}</div>
       <QnnReactCron
-        value={value}
+        value={cronText}
         onOk={(value) => {
           console.log('cron:', value)
         }}
         getCronFns={(_cronFns) => {
           cronFns = _cronFns
         }}
+        defaultTab={'hour'}
         footer={[
           <Button
             key="cencel"
             style={{ marginRight: 10 }}
             onClick={() => {
-              setValue('')
+              setCronText('')
             }}
           >
             重置
@@ -50,7 +41,7 @@ const CronGenerator: React.FC<ICronGeneratorProps> = ({}) => {
             key="getValue"
             type="primary"
             onClick={() => {
-              setValue(cronFns.getValue())
+              setCronText(cronFns.getValue())
             }}
           >
             生成

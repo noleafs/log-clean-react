@@ -9,7 +9,7 @@ const Updater: React.FC = () => {
   return (
     <>
       <Card title="软件更新器">
-
+        功能敬请期待O(∩_∩)O哈哈~
       </Card>
     </>
   )
