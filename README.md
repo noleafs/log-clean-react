@@ -32,3 +32,5 @@ $ yarn build:mac
 # For Linux
 $ yarn build:linux
 ```
+
+一个用于配置定时清除指定文件夹日志的工具
