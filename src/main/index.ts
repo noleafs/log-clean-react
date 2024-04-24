@@ -114,11 +114,6 @@ app.on('window-all-closed', () => {
 
 // 构建配置自动更新
 app.on('ready', () => {
-  console.log('测试执行定时任务')
-  // 执行任务
-  schedule.scheduleJob('0/2 * * * * ?', () => {
-    console.log('测试执行的任务，执行时间为', new Date())
-  })
 
   // 禁止自动更新，以便用户控制下载时机
   autoUpdater.autoDownload = false
