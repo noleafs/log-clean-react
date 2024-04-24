@@ -17,8 +17,9 @@ const CronGenerator: React.FC<ICronGeneratorProps> = (props) => {
   const { cronText, setCronText } = props
   return (
     <>
-      <div style={{ textAlign: 'center', margin: '0 0 12px 0' }}>Cron表达式： {cronText}</div>
+      <div style={{ textAlign: 'center', margin: '0 0 12px 0' }}>Cron表达式： {cronText}，每天晚上0点执行一次</div>
       <QnnReactCron
+        disabled
         value={cronText}
         onOk={(value) => {
           console.log('cron:', value)
@@ -27,6 +28,15 @@ const CronGenerator: React.FC<ICronGeneratorProps> = (props) => {
           cronFns = _cronFns
         }}
         defaultTab={'hour'}
+        panesShow={{
+          second: true,
+          minute: true,
+          hour: true,
+          day: true,
+          month: true,
+          week: false,
+          year: false
+        }}
         footer={[
           <Button
             key="cencel"
