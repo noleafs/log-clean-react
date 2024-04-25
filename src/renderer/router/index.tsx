@@ -2,6 +2,7 @@ import React, { Suspense, useEffect } from 'react'
 import { antdUtils } from '../utils/antd'
 import { App, Skeleton } from 'antd'
 import { useRoutes } from 'react-router-dom'
+
 const lazyLoad = (moduleName: string) => {
   const viteModule = import.meta.glob('../**/*.tsx')
   //组件地址
@@ -15,8 +16,8 @@ const lazyLoad = (moduleName: string) => {
   }
   const Module = React.lazy(viteModule[`${URL}`] as any)
   return (
-    <Module/>
-  );
+    <Module />
+  )
 }
 
 const routes = [
@@ -33,9 +34,13 @@ const routes = [
         component: lazyLoad('Updater').type
       },
       {
+        path: '/exception',
+        component: lazyLoad('LogAnalysis').type
+      },
+      {
         path: '*',
         component: lazyLoad('404').type
-      },
+      }
     ]
   }
 ]
@@ -46,9 +51,9 @@ const generateRouter = (routers: any): any => {
     if (item.children) {
       item.children = generateRouter(item.children)
     }
-    item.element = <Suspense fallback={<Skeleton/>}>
-        <item.component />
-    </Suspense>;
+    item.element = <Suspense fallback={<Skeleton />}>
+      <item.component />
+    </Suspense>
     {
       /* 把懒加载的异步路由变成组件装载进去 */
     }
@@ -86,4 +91,4 @@ const checkRouterAuth = (path: string) => {
   return auth
 }
 
-export {Router, checkRouterAuth}
+export { Router, checkRouterAuth }
