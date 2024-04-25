@@ -25,7 +25,7 @@ interface EditableRowProps {
 }
 
 // 日期格式
-const dateFormat = 'YYYY-MM-DD'
+const dateFormat = 'YYYY-MM-DD HH:mm:ss'
 
 const EditableRow: React.FC<EditableRowProps> = ({ index, ...props }) => {
   const [form] = Form.useForm()
@@ -123,6 +123,7 @@ const EditableCell: React.FC<EditableCellProps> = ({
             break
         }
         if (value !== '') {
+          form.setFieldsValue({ [dataIndex]: value })
           handleSave({ ...record, ...values, ...{ datetime: value } })
         }
       }
@@ -160,7 +161,7 @@ const EditableCell: React.FC<EditableCellProps> = ({
       input = <Select onChange={save} options={options} />
       break
     case 'datetime':
-      input = <DatePicker disabled={record.saveTime != '4'}
+      input = <DatePicker showTime={{ defaultValue: dayjs('00:00:00', 'HH:mm:ss') }} disabled={record.saveTime != '4'}
                           disabledDate={disableDate}
                           onChange={datetimeChange} allowClear={false} />
       break
@@ -240,7 +241,7 @@ const FileTable: React.FC<FileTableProps> = (props: FileTableProps) => {
       key: '0',
       logPath: '日志文件路径',
       saveTime: '1',
-      datetime: '2024-04-18',
+      datetime: moment().subtract(30, 'days').format(dateFormat),
       containDir: true
     }
   ])
@@ -273,7 +274,7 @@ const FileTable: React.FC<FileTableProps> = (props: FileTableProps) => {
     {
       title: '时长',
       dataIndex: 'datetime',
-      width: '20%',
+      width: '25%',
       editable: true,
       inputType: 'datetime'
     },
@@ -304,7 +305,7 @@ const FileTable: React.FC<FileTableProps> = (props: FileTableProps) => {
       key: count,
       logPath: `日志文件路径`,
       saveTime: '1',
-      datetime: '2024-04-18',
+      datetime: moment().subtract(30, 'days').format(dateFormat),
       containDir: true
     }
     setDataSource([...dataSource, newData])

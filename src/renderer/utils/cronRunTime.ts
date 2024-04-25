@@ -312,7 +312,6 @@ export const cronRunTime = (cron: string, num = 5) => {
       // 如果到达最大值时
       if (nMonth > MDate[MDate.length - 1]) {
         resetMonth()
-
         continue
       }
       // 循环月份数组
@@ -326,10 +325,8 @@ export const cronRunTime = (cron: string, num = 5) => {
           resetDay()
           if (Mi === MDate.length - 1) {
             resetMonth()
-
             continue goYear
           }
-
           continue
         }
         // 循环日期数组
@@ -338,7 +335,6 @@ export const cronRunTime = (cron: string, num = 5) => {
           // 赋值、方便后面运算
           let DD = DDate[Di]
           let thisDD = DD < 10 ? `0${DD}` : DD
-
           // 如果到达最大值时
           if (nHour > hDate[hDate.length - 1]) {
             resetHour()
@@ -346,20 +342,16 @@ export const cronRunTime = (cron: string, num = 5) => {
               resetDay()
               if (Mi === MDate.length - 1) {
                 resetMonth()
-
                 continue goYear
               }
-
               continue goMonth
             }
-
             continue
           }
 
           // 判断日期的合法性，不合法的话也是跳出当前循环
           if (!checkDate(`${YY}-${MM}-${thisDD} 00:00:00`) && dayRule !== 'workDay' && dayRule !== 'lastWeek' && dayRule !== 'lastDay') {
             resetDay()
-
             continue goMonth
           }
           // 如果日期规则中有值时
@@ -368,9 +360,7 @@ export const cronRunTime = (cron: string, num = 5) => {
 
             if (!checkDate(`${YY}-${MM}-${thisDD} 00:00:00`)) {
               while (DD > 0 && !checkDate(`${YY}-${MM}-${thisDD} 00:00:00`)) {
-
                 DD--
-
                 thisDD = DD < 10 ? `0${DD}` : DD
               }
             }
@@ -378,7 +368,6 @@ export const cronRunTime = (cron: string, num = 5) => {
             // 校验并调整如果是2月30号这种日期传进来时需调整至正常月底
             if (!checkDate(`${YY}-${MM}-${thisDD} 00:00:00`)) {
               while (DD > 0 && !checkDate(`${YY}-${MM}-${thisDD} 00:00:00`)) {
-
                 DD--
                 thisDD = DD < 10 ? `0${DD}` : DD
               }
@@ -414,13 +403,10 @@ export const cronRunTime = (cron: string, num = 5) => {
                 resetDay()
                 if (Mi === MDate.length - 1) {
                   resetMonth()
-
                   continue goYear
                 }
-
                 continue goMonth
               }
-
               continue
             }
           } else if (dayRule === 'assWeek') {
@@ -466,16 +452,12 @@ export const cronRunTime = (cron: string, num = 5) => {
                   resetDay()
                   if (Mi === MDate.length - 1) {
                     resetMonth()
-
                     continue goYear
                   }
-
                   continue goMonth
                 }
-
                 continue goDay
               }
-
               continue
             }
             // 循环"分"数组
@@ -493,19 +475,14 @@ export const cronRunTime = (cron: string, num = 5) => {
                       resetDay()
                       if (Mi === MDate.length - 1) {
                         resetMonth()
-
                         continue goYear
                       }
-
                       continue goMonth
                     }
-
                     continue goDay
                   }
-
                   continue goHour
                 }
-
                 continue
               }
               // 循环"秒"数组
@@ -529,19 +506,14 @@ export const cronRunTime = (cron: string, num = 5) => {
                         resetDay()
                         if (Mi === MDate.length - 1) {
                           resetMonth()
-
                           continue goYear
                         }
-
                         continue goMonth
                       }
-
                       continue goDay
                     }
-
                     continue goHour
                   }
-
                   continue goMin
                 }
               } // goSecond

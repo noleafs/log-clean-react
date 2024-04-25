@@ -1,7 +1,7 @@
-import CronGenerator from '@/renderer/components/CronGenerator'
 import { Card, Space } from 'antd'
 import React, { useEffect, useState } from 'react'
 import FileTable from '@/renderer/components/FileTable'
+import Cron from '@/renderer/components/Cron'
 
 // 发送消息的
 const { ipcRenderer } = window.electron
@@ -19,6 +19,7 @@ const Timer: React.FC = () => {
     ipcRenderer.send('message', JSON.stringify({ command: 'getConfigFile' }))
   }, [])
 
+
   /**
    * 保存配置
    */
@@ -30,14 +31,13 @@ const Timer: React.FC = () => {
     // 向主进程发送待存储的数据
     ipcRenderer.send('save-config', json)
   }
-
   return (
     <>
       <Space direction="vertical">
         <Card bordered={false} title="定时计划配置">
           <Space direction="vertical" size="small" style={{ display: 'flex' }}>
             {/* 定时计划 */}
-            <CronGenerator cronText={value} setCronText={setValue} />
+            <Cron cronExpression={value} setCronExpression={setValue}></Cron>
           </Space>
         </Card>
         {/* 日志路径配置 */}

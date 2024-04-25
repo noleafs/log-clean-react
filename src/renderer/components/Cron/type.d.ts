@@ -51,3 +51,8 @@ export interface PointType {
   month: number[];
   week: number[];
 }
+
+export type CronProps = {
+  cronExpression: string;
+  setCronExpression: any
+}

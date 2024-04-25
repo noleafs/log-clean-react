@@ -153,19 +153,21 @@ app.on('ready', () => {
 
 /**
  * 定义一个函数用于遍历文件夹，并比较其创建时间，判定存留的时间
+ * @param originalFolder 源文件夹（不能被删除）
  * @param folderPath 文件夹路径
  * @param containsSubFolder 包含子文件夹
  * @param saveTime 存留时间
  */
 // @ts-ignore
-function traverseFolder(folderPath: string, containsSubFolder = true, saveTime: string): void {
+function traverseFolder(originalFolder: string, folderPath: string, containsSubFolder = true, saveTime: Date): void {
   // 读取文件夹下所有文件
   fs.readdir(folderPath, (err, files) => {
     if (err) {
       console.error('读取文件夹失败:', err)
       return
     }
-    if (files.length === 0) {
+    // 这里需要判定不能包含第一次进来时配置的文件夹路径
+    if (files.length === 0 && folderPath !== originalFolder) {
       fs.rmdir(folderPath, (err) => {
         if (err) {
           console.error(err)
@@ -181,30 +183,29 @@ function traverseFolder(folderPath: string, containsSubFolder = true, saveTime: 
           console.error('Error getting file stats:', err)
           return
         }
-
         if (stats.isDirectory() && containsSubFolder) {
           // 如果是文件夹，则递归遍历文件夹
-          traverseFolder(filePath, containsSubFolder, saveTime)
+          traverseFolder(originalFolder, filePath, containsSubFolder, saveTime)
         } else {
           // 如果是文件，则获取文件创建日期和文件名称， 通过创建时间计算比如说好多天之前的文件进行删除
           const createDate = stats.birthtime
-          console.log('文件路径：', filePath, '文件名:', file, ' 创建时间:', formatDate(createDate))
-          // 这里调用删除文件
-          console.log('调用删除文件, 文件所处的文件夹是', folderPath)
-          fs.unlink(filePath, (err) => {
-            if (err) {
-              console.log('删除文件失败，路径', filePath, '失败原因：', err)
-              return
-            }
-            // 删除文件后，判定当前文件夹是否是空文件夹
-            if (isFolderEmpty(folderPath)) {
-              fs.rmdir(folderPath, (err) => {
-                if (err) {
-                  console.error(err)
-                }
-              })
-            }
-          })
+          // 这里调用删除文件(判定了文件的创建时间在配置的时间之前的就进行删除操作)
+          if (createDate < saveTime) {
+            fs.unlink(filePath, (err) => {
+              if (err) {
+                console.log('删除文件失败，路径', filePath, '失败原因：', err)
+                return
+              }
+              // 删除文件后，判定当前文件夹是否是空文件夹
+              if (isFolderEmpty(folderPath) && folderPath !== originalFolder) {
+                fs.rmdir(folderPath, (err) => {
+                  if (err) {
+                    console.error(err)
+                  }
+                })
+              }
+            })
+          }
         }
       })
     })
@@ -212,6 +213,7 @@ function traverseFolder(folderPath: string, containsSubFolder = true, saveTime: 
 }
 
 // 定义一个函数，将日期转换为指定格式的字符串
+// @ts-ignore
 function formatDate(date: Date): string {
   const year = date.getFullYear()
   const month = String(date.getMonth() + 1).padStart(2, '0')
@@ -264,7 +266,7 @@ function loadConfig() {
   } catch (error) {
     // 生成一个默认的配置文件
     const defaultConfig = {
-      timer: '? ? 0 * * ? *',
+      timer: '  1 * * *',
       logConfig: [
         {
           key: '0',
@@ -293,10 +295,11 @@ function scheduleJob(config: any) {
       // 需要执行的定时任务，根据配置删除指定文件夹下的内容
       for (let i = 0, len = config.logConfig.length; i < len; i++) {
         const cfg = config.logConfig[i]
-        // 获取配置的日志路劲、保留时长、时间、是否包含子文件夹
+        // 获取配置的日志路径、保留时长、时间、是否包含子文件夹
         const { logPath, datetime, containDir } = cfg
         // 需要将时间进行转换
-        traverseFolder(logPath, containDir, datetime)
+        const time = new Date(datetime)
+        traverseFolder(logPath, logPath, containDir, time)
 
       }
     }
