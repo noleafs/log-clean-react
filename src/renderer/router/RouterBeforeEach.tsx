@@ -1,11 +1,18 @@
-import {Outlet, useNavigate} from "react-router-dom";
-import React, {useEffect} from 'react'
+import { Outlet, useNavigate, useLocation } from 'react-router-dom'
+import React, { useEffect } from 'react'
 
 const RouterBeforeEach: React.FC = () => {
-  const navigate = useNavigate();
+
+  const navigate = useNavigate()
+  const location = useLocation()
+
   useEffect(() => {
-    navigate("/timer");
+    console.log(location.pathname)
+  }, [location])
+
+  useEffect(() => {
+    navigate('/timer')
   }, [])
-  return <Outlet/>
+  return <Outlet />
 }
 export default RouterBeforeEach

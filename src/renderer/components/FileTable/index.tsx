@@ -212,17 +212,15 @@ type ColumnTypes = Exclude<EditableTableProps['columns'], undefined>;
 
 type FileTableProps = {
   onSave: (date: any) => void;
+  datasource: DataType[];
+  setDatasource: any
 }
 
 const FileTable: React.FC<FileTableProps> = (props: FileTableProps) => {
-  const { onSave } = props
+  const { onSave, datasource, setDatasource } = props
 
   useEffect(() => {
-    // 当前组件绑定接受主进程发送过来的配置信息读取
-    ipcRenderer.on('config-loaded', (_event, arg) => {
-      const logConfig = arg['logConfig']
-      setDataSource(logConfig)
-    })
+    ipcRenderer.removeAllListeners('save_result')
     // 监听主进程发送过来的保存配置的结果
     ipcRenderer.on('save_result', (_event, arg) => {
       // 提示保存成或失败
@@ -232,25 +230,14 @@ const FileTable: React.FC<FileTableProps> = (props: FileTableProps) => {
         antdUtils.message?.error('配置保存失败！原因：' + arg['err'])
       }
     })
-    // 向主进发送消息，去获取配置信息
-    ipcRenderer.send('config-loaded')
   }, [])
 
-  const [dataSource, setDataSource] = useState<DataType[]>([
-    {
-      key: '0',
-      logPath: '日志文件路径',
-      saveTime: '1',
-      datetime: moment().subtract(30, 'days').format(dateFormat),
-      containDir: true
-    }
-  ])
 
   const [count, setCount] = useState(2)
 
   const handleDelete = (key: React.Key) => {
-    const newData = dataSource.filter((item) => item.key !== key)
-    setDataSource(newData)
+    const newData = datasource.filter((item) => item.key !== key)
+    setDatasource(newData)
   }
 
   const defaultColumns: (ColumnTypes[number] & { editable?: boolean; dataIndex: string, inputType?: string })[] = [
@@ -292,7 +279,7 @@ const FileTable: React.FC<FileTableProps> = (props: FileTableProps) => {
       dataIndex: 'operation',
       fixed: 'right',
       render: (_, record) =>
-        dataSource.length >= 1 ? (
+        datasource.length >= 1 ? (
           <Popconfirm title="确定删除吗?删除后不可恢复！" onConfirm={() => handleDelete(record.key)}>
             <a>删除</a>
           </Popconfirm>
@@ -308,7 +295,7 @@ const FileTable: React.FC<FileTableProps> = (props: FileTableProps) => {
       datetime: moment().subtract(30, 'days').format(dateFormat),
       containDir: true
     }
-    setDataSource([...dataSource, newData])
+    setDatasource([...datasource, newData])
     setCount(count + 1)
   }
 
@@ -317,14 +304,14 @@ const FileTable: React.FC<FileTableProps> = (props: FileTableProps) => {
    * @param row
    */
   const handleSave = (row: DataType) => {
-    const newData = [...dataSource]
+    const newData = [...datasource]
     const index = newData.findIndex((item) => row.key === item.key)
     const item = newData[index]
     newData.splice(index, 1, {
       ...item,
       ...row
     })
-    setDataSource(newData)
+    setDatasource(newData)
   }
 
 
@@ -358,7 +345,7 @@ const FileTable: React.FC<FileTableProps> = (props: FileTableProps) => {
         <Button onClick={handleAdd} type="primary" style={{ marginBottom: 16 }} icon={<PlusOutlined />}>
           新增
         </Button>
-        <Button onClick={() => onSave(dataSource)} type="primary" style={{ marginBottom: 16 }}
+        <Button onClick={() => onSave(datasource)} type="primary" style={{ marginBottom: 16 }}
                 icon={<SaveOutlined />}>
           存储
         </Button>
@@ -368,7 +355,7 @@ const FileTable: React.FC<FileTableProps> = (props: FileTableProps) => {
         components={components}
         rowClassName={() => 'editable-row'}
         bordered
-        dataSource={dataSource}
+        dataSource={datasource}
         columns={columns as ColumnTypes}
       />
     </div>

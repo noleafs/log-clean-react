@@ -8,15 +8,18 @@ const { ipcRenderer } = window.electron
 const Timer: React.FC = () => {
 
   let [value, setValue] = useState<string>('')
-
+  let [datasource, setDataSource] = useState<any[]>([])
   useEffect(() => {
+    ipcRenderer.removeAllListeners('config-loaded')
     ipcRenderer.on('config-loaded', (_event, arg) => {
       const timer = arg['timer']
+      const logConfig = arg['logConfig']
       setValue(timer)
+      setDataSource(logConfig)
       console.log('渲染进程收到的消息', arg)
     })
     // 向主进程发送消息，请求获取定时计划的配置信息
-    ipcRenderer.send('message', JSON.stringify({ command: 'getConfigFile' }))
+    ipcRenderer.send('config-loaded', JSON.stringify({ command: 'getConfigFile' }))
   }, [])
 
 
@@ -42,7 +45,7 @@ const Timer: React.FC = () => {
         </Card>
         {/* 日志路径配置 */}
         <Card bordered={false} title="日志路径配置">
-          <FileTable onSave={saveConfig} />
+          <FileTable onSave={saveConfig} datasource={datasource} setDatasource={setDataSource} />
         </Card>
       </Space>
     </>

@@ -2,7 +2,13 @@ import React, { Suspense, useEffect } from 'react'
 import { antdUtils } from '../utils/antd'
 import { App, Skeleton } from 'antd'
 import { useRoutes } from 'react-router-dom'
+import NotFound from '@/renderer/views/NotFound'
+import LogAnalysis from '@/renderer/views/LogAnalysis'
+import Updater from '@/renderer/views/Updater'
+import Timer from '@/renderer/views/Timer'
+import Layouts from '@/renderer/layouts'
 
+// @ts-ignore
 const lazyLoad = (moduleName: string) => {
   const viteModule = import.meta.glob('../**/*.tsx')
   //组件地址
@@ -23,23 +29,23 @@ const lazyLoad = (moduleName: string) => {
 const routes = [
   {
     path: '/',
-    component: lazyLoad('layouts').type,
+    component: <Layouts />,
     children: [
       {
-        path: '/timer',
-        component: lazyLoad('Timer').type
+        path: 'timer',
+        component: <Timer />
       },
       {
-        path: '/updater',
-        component: lazyLoad('Updater').type
+        path: 'updater',
+        component: <Updater />
       },
       {
-        path: '/exception',
-        component: lazyLoad('LogAnalysis').type
+        path: 'exception',
+        component: <LogAnalysis />
       },
       {
         path: '*',
-        component: lazyLoad('404').type
+        component: <NotFound />
       }
     ]
   }
@@ -52,7 +58,7 @@ const generateRouter = (routers: any): any => {
       item.children = generateRouter(item.children)
     }
     item.element = <Suspense fallback={<Skeleton />}>
-      <item.component />
+      {item.component}
     </Suspense>
     {
       /* 把懒加载的异步路由变成组件装载进去 */

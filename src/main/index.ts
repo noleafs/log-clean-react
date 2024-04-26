@@ -18,10 +18,11 @@ function createWindow(): BrowserWindow {
     height: 700,
     show: false,
     autoHideMenuBar: true,
+    resizable: false,
     // icon: path.join(__dirname, './resource/icon.png'),
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
-      contextIsolation: true,
+      contextIsolation: false,
       preload: join(__dirname, '../preload/index.js'),
       sandbox: false
     }
