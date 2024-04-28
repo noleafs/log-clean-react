@@ -8,8 +8,8 @@ import { Card } from 'antd'
 const LogAnalysis: React.FC = () => {
   return (
     <>
-      <Card>
-        日志异常分析组件
+      <Card title="日志分析">
+        功能敬请期待O(∩_∩)O哈哈~
       </Card>
     </>
   )
