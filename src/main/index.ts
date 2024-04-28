@@ -7,6 +7,7 @@ import path from 'path'
 import schedule from 'node-schedule'
 import moment from 'moment'
 import { autoUpdater } from 'electron-updater'
+import { existsSync } from 'node:fs'
 
 // 定时任务对象实例
 let job: schedule.Job
@@ -159,7 +160,6 @@ app.on('ready', () => {
  * @param containsSubFolder 包含子文件夹
  * @param saveTime 存留时间
  */
-// @ts-ignore
 function traverseFolder(originalFolder: string, folderPath: string, containsSubFolder = true, saveTime: Date): void {
   // 读取文件夹下所有文件
   fs.readdir(folderPath, (err, files) => {
@@ -168,12 +168,13 @@ function traverseFolder(originalFolder: string, folderPath: string, containsSubF
       return
     }
     // 这里需要判定不能包含第一次进来时配置的文件夹路径
-    if (files.length === 0 && folderPath !== originalFolder) {
+    if (files.length === 0 && folderPath !== originalFolder && existsSync(folderPath)) {
       fs.rmdir(folderPath, (err) => {
         if (err) {
           console.error(err)
         }
       })
+      return
     }
     // 遍历文件数组
     files.forEach((file) => {
@@ -197,8 +198,8 @@ function traverseFolder(originalFolder: string, folderPath: string, containsSubF
                 console.log('删除文件失败，路径', filePath, '失败原因：', err)
                 return
               }
-              // 删除文件后，判定当前文件夹是否是空文件夹
-              if (isFolderEmpty(folderPath) && folderPath !== originalFolder) {
+              // 删除文件后，判定当前文件夹是否是空文件夹而且需要判断文件夹存在
+              if (existsSync(folderPath) && isFolderEmpty(folderPath) && folderPath !== originalFolder) {
                 fs.rmdir(folderPath, (err) => {
                   if (err) {
                     console.error(err)
