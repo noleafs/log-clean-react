@@ -259,7 +259,8 @@ const FileTable: React.FC<FileTableProps> = (props: FileTableProps) => {
         <span>{record.saveTime === '1' ? '近30天' : (record.saveTime === '2' ? '近15天' : (record.saveTime === '3' ? '近一周' : '自定义'))}</span>
     },
     {
-      title: '时长',
+      // title: '时长',
+      title: '保留时间',
       dataIndex: 'datetime',
       width: '25%',
       editable: true,

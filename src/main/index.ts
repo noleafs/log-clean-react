@@ -12,9 +12,10 @@ import { existsSync } from 'node:fs'
 // 定时任务对象实例
 let job: schedule.Job
 
+var mainWindow;
 function createWindow(): BrowserWindow {
   // Create the browser window.
-  const mainWindow = new BrowserWindow({
+   mainWindow = new BrowserWindow({
     width: 1150,
     height: 700,
     show: false,
@@ -54,6 +55,8 @@ function createWindow(): BrowserWindow {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
+
+ 
   // Set app user model id for windows
   electronApp.setAppUserModelId('com.electron')
 
@@ -66,6 +69,8 @@ app.whenReady().then(() => {
 
   // IPC test
   ipcMain.on('ping', () => console.log('pong'))
+
+
   ipcMain.on('message', (_event, arg) => {
     // 收到发送过来的消息后，去读取对应文件夹下的文件，配置文件的地址为
     const param = JSON.parse(arg)
@@ -75,12 +80,57 @@ app.whenReady().then(() => {
     // event.sender.send('renderer-message', '2323423')
   })
 
+
+
+  /**
+   * 获取版本号
+   */
+  ipcMain.on('get-version', () =>{
+    mainWindow.webContents.send('version_result', app.getVersion())
+ })
+
+ /**
+  * 存储软件运行中的其它东西。例如运行记录等
+  * @param store传入需要存储的k v,以对象形式
+  */
+ ipcMain.on('save-store', (_event, store) => {
+    saveStore(store)
+ })
+
+
+
+ /**
+  * 读取运行结果
+  */
+ ipcMain.on('read-resultTime', (_event, store) => {
+  let data: any;
+  const filePath = path.join(app.getPath('userData'), 'log-clean-store.json')
+  console.log("store.json", filePath)
+  try {
+    data = JSON.parse(fs.readFileSync(filePath, 'utf-8'))
+    console.log(" read-resultTime 读取store", data)
+  } catch (error){
+    if(error.code === 'ENOENT') {
+      console.log("文件不存在")
+      data = {resultTime:[]};
+    } else {
+      console.log(" read-resultTime 读取运行记录出错")
+    }
+  } finally {
+    mainWindow.webContents.send('read-resultTime-result', data.resultTime == undefined ? []:data.resultTime)
+  }
+ })
+
+
+
+
   // 接收渲染进程发送的存储配置信息的消息
   ipcMain.on('save-config', (_event, config) => {
     const result = saveConfig(config)
     // 将写入结果回传给渲染进程
     mainWindow.webContents.send('save_result', result)
   })
+
 
   // 接收渲染进程发送的获取配置
   ipcMain.on('config-loaded', (_event, _config) => {
@@ -113,6 +163,7 @@ app.on('window-all-closed', () => {
     job.cancel()
   }
 })
+
 
 // 构建配置自动更新
 app.on('ready', () => {
@@ -158,7 +209,7 @@ app.on('ready', () => {
  * @param originalFolder 源文件夹（不能被删除）
  * @param folderPath 文件夹路径
  * @param containsSubFolder 包含子文件夹
- * @param saveTime 存留时间
+ * @param saveTime 存留时间， 这个时间之前的都将删除
  */
 function traverseFolder(originalFolder: string, folderPath: string, containsSubFolder = true, saveTime: Date): void {
   // 读取文件夹下所有文件
@@ -236,6 +287,69 @@ function isFolderEmpty(folderPath: string): boolean {
   return files.length === 0
 }
 
+
+/**
+ * 保存数据到文件中
+ */
+function saveStore(store) {
+  let data;
+  const filePath = path.join(app.getPath('userData'), 'log-clean-store.json')
+  try {
+    data = fs.readFileSync(filePath, 'utf-8')
+    data = JSON.parse(data);
+  } catch (error){
+    if(error.code === 'ENOENT') {
+      
+    }
+    data = {};
+  } finally {
+    // 此句不能删除，文件可能会被人为清空，不判断会导致出问题
+    if(data == null || data.length == 0) {
+      data = {};
+    }
+    const result = Object.assign(data, store);
+    fs.writeFileSync(filePath, JSON.stringify(result), 'utf-8')
+    return result;
+  }
+}
+
+let result;
+/**
+ * 保存日志运行记录，并发送消息给渲染进程
+ * @param store 
+ */
+function saveResultTime(store) {
+  // 首次需要从文件中读取记录
+  if(result == undefined) {
+    const filePath = path.join(app.getPath('userData'), 'log-clean-store.json')
+    try{
+      result =  JSON.parse(fs.readFileSync(filePath, 'utf-8'))
+    }catch(err) {
+      result = {resultTime: []}
+    }
+    if(result == undefined || result.length == 0 ||  result.resultTime == undefined){
+      result = saveStore(store);
+    }
+  } 
+  
+  if(result != undefined && result!= null && result.resultTime != undefined) {
+    let resultTime = result.resultTime;
+    // console.log("resultTime:",resultTime)
+      if(resultTime.length >= 5) {
+        resultTime.shift();
+        // console.log("newArr", newArr)
+        result.resultTime = resultTime;
+      }
+      result.resultTime.push(store.resultTime[0]);
+      result = saveStore({resultTime: result.resultTime});
+  }
+
+  // console.log("发送", result.resultTime, result)
+  mainWindow.webContents.send('read-resultTime-result', result.resultTime)
+}
+
+
+
 /**
  * 保存配置信息到文件
  * @param config
@@ -263,7 +377,9 @@ function saveConfig(config: any): any {
 function loadConfig() {
   const configPath = path.join(app.getPath('userData'), 'config.json')
   try {
-    const data = fs.readFileSync(configPath, 'utf-8')
+   
+   const data = fs.readFileSync(configPath, 'utf-8')
+
     return JSON.parse(data)
   } catch (error) {
     // 生成一个默认的配置文件
@@ -292,7 +408,8 @@ function loadConfig() {
  */
 function scheduleJob(config: any) {
   return () => {
-    console.log('执行了一次定时任务，执行时间是：', new Date())
+    console.log('执行了一次定时任务，执行时间是：', formatDate(new Date()) )
+    saveResultTime({resultTime:[formatDate(new Date())]})
     if (config && config.timer && config.logConfig && config.logConfig.length > 0) {
       // 需要执行的定时任务，根据配置删除指定文件夹下的内容
       for (let i = 0, len = config.logConfig.length; i < len; i++) {

@@ -4,6 +4,8 @@ import { CheckboxValueType } from 'antd/lib/checkbox/Group'
 import classes from './index.module.scss'
 import { cronRunTime } from '@/renderer/utils/cronRunTime'
 import { CronProps, cronTimeEnum, LoopType, PeriodType, PointType, RadioType } from './type'
+// 发送消息的
+const { ipcRenderer } = window.electron
 
 // cron 类型
 const cronType = ['second', 'minute', 'hour', 'day', 'month', 'week'] as cronTimeEnum[]
@@ -15,7 +17,7 @@ const radioStyle = {
 
 const Cron: React.FC<CronProps> = (props: { cronExpression: string, setCronExpression: any }) => {
   const { cronExpression, setCronExpression } = props
-
+  console.log("cronExpression", cronExpression)
   // 单选 选择执行类型
   const [radioValue, setRadioValue] = useState<RadioType>({
     second: 1,
@@ -217,11 +219,22 @@ const Cron: React.FC<CronProps> = (props: { cronExpression: string, setCronExpre
 
     const cronTextCreate = `${second} ${minute} ${hour} ${day} ${month} ${week}`
 
+    console.log(cronTextCreate, "哈哈哈")
+    // 设置cron
     setCronExpression(cronTextCreate)
-    setResultTime(cronRunTime(cronTextCreate))
+
+    // 设置运行结果
+    // setResultTime(cronRunTime(cronTextCreate))
   }
 
+  // 获取运行结果
+  ipcRenderer.on('read-resultTime-result', (_event, arg) => {
+    setResultTime(arg)
+  })
+
+
   useEffect(() => {
+    // console.log("运行 props", cronExpression)
     if (cronExpression) {
       cronComeShow(cronExpression)
     } else {
@@ -280,7 +293,6 @@ const Cron: React.FC<CronProps> = (props: { cronExpression: string, setCronExpre
       case 'day':
         setRadioValue({ ...radioValue, week: 2, ...cronItemGenerator(type, e.target.value) })
         break
-
       default:
         setRadioValue({
           ...radioValue,
@@ -360,18 +372,18 @@ const Cron: React.FC<CronProps> = (props: { cronExpression: string, setCronExpre
                   <Radio style={radioStyle} value="period">
                     周期从
                     <InputNumber size="small" min={0} max={58} value={periodValue.second.min}
-                                 onChange={(e) => handlePeriodChange(e as number, 'second', 'min')} />
+                      onChange={(e) => handlePeriodChange(e as number, 'second', 'min')} />
                     -
                     <InputNumber size="small" min={1} max={59} value={periodValue.second.max}
-                                 onChange={(e) => handlePeriodChange(e as number, 'second', 'max')} />秒
+                      onChange={(e) => handlePeriodChange(e as number, 'second', 'max')} />秒
                   </Radio>
                   <Radio style={radioStyle} value="loop">
                     从
                     <InputNumber size="small" min={0} max={58} value={loopValue.second.start}
-                                 onChange={(e) => handleLoopChange(e as number, 'second', 'start')} />
+                      onChange={(e) => handleLoopChange(e as number, 'second', 'start')} />
                     秒开始，每
                     <InputNumber size="small" min={1} max={59} value={loopValue.second.end}
-                                 onChange={(e) => handleLoopChange(e as number, 'second', 'end')} />
+                      onChange={(e) => handleLoopChange(e as number, 'second', 'end')} />
                     秒执行一次
                   </Radio>
                   <Row>
@@ -406,18 +418,18 @@ const Cron: React.FC<CronProps> = (props: { cronExpression: string, setCronExpre
                   <Radio style={radioStyle} value="period">
                     周期从
                     <InputNumber size="small" min={0} max={58} value={periodValue.minute.min}
-                                 onChange={(e) => handlePeriodChange(e as number, 'minute', 'min')} />
+                      onChange={(e) => handlePeriodChange(e as number, 'minute', 'min')} />
                     -
                     <InputNumber size="small" min={2} max={59} value={periodValue.minute.max}
-                                 onChange={(e) => handlePeriodChange(e as number, 'minute', 'max')} />分
+                      onChange={(e) => handlePeriodChange(e as number, 'minute', 'max')} />分
                   </Radio>
                   <Radio style={radioStyle} value="loop">
                     从
                     <InputNumber size="small" min={0} max={58} value={loopValue.minute.start}
-                                 onChange={(e) => handleLoopChange(e as number, 'minute', 'start')} />
+                      onChange={(e) => handleLoopChange(e as number, 'minute', 'start')} />
                     分开始，每
                     <InputNumber size="small" min={1} max={58} value={loopValue.minute.end}
-                                 onChange={(e) => handleLoopChange(e as number, 'minute', 'end')} />
+                      onChange={(e) => handleLoopChange(e as number, 'minute', 'end')} />
                     分执行一次
                   </Radio>
 
@@ -453,18 +465,18 @@ const Cron: React.FC<CronProps> = (props: { cronExpression: string, setCronExpre
                   <Radio style={radioStyle} value="period">
                     周期从
                     <InputNumber size="small" min={0} max={22} value={periodValue.hour.min}
-                                 onChange={(e) => handlePeriodChange(e as number, 'hour', 'min')} />
+                      onChange={(e) => handlePeriodChange(e as number, 'hour', 'min')} />
                     -
                     <InputNumber size="small" min={1} max={23} value={periodValue.hour.max}
-                                 onChange={(e) => handlePeriodChange(e as number, 'hour', 'max')} />时
+                      onChange={(e) => handlePeriodChange(e as number, 'hour', 'max')} />时
                   </Radio>
                   <Radio style={radioStyle} value="loop">
                     从
                     <InputNumber size="small" min={0} max={22} value={loopValue.hour.start}
-                                 onChange={(e) => handleLoopChange(e as number, 'hour', 'start')} />
+                      onChange={(e) => handleLoopChange(e as number, 'hour', 'start')} />
                     时开始，每
                     <InputNumber size="small" min={1} max={22} value={loopValue.hour.end}
-                                 onChange={(e) => handleLoopChange(e as number, 'hour', 'end')} />
+                      onChange={(e) => handleLoopChange(e as number, 'hour', 'end')} />
                     时执行一次
                   </Radio>
 
@@ -504,18 +516,18 @@ const Cron: React.FC<CronProps> = (props: { cronExpression: string, setCronExpre
                   <Radio style={radioStyle} value="period">
                     周期从
                     <InputNumber size="small" min={1} max={30} value={periodValue.day.min}
-                                 onChange={(e) => handlePeriodChange(e as number, 'day', 'min')} />
+                      onChange={(e) => handlePeriodChange(e as number, 'day', 'min')} />
                     -
                     <InputNumber size="small" min={2} max={31} value={periodValue.day.max}
-                                 onChange={(e) => handlePeriodChange(e as number, 'day', 'max')} />日
+                      onChange={(e) => handlePeriodChange(e as number, 'day', 'max')} />日
                   </Radio>
                   <Radio style={radioStyle} value="loop">
                     从
                     <InputNumber size="small" min={1} max={31} value={loopValue.day.start}
-                                 onChange={(e) => handleLoopChange(e as number, 'day', 'start')} />
+                      onChange={(e) => handleLoopChange(e as number, 'day', 'start')} />
                     日开始，每
                     <InputNumber size="small" min={1} max={31} value={loopValue.day.end}
-                                 onChange={(e) => handleLoopChange(e as number, 'day', 'end')} />
+                      onChange={(e) => handleLoopChange(e as number, 'day', 'end')} />
                     日执行一次
                   </Radio>
 
@@ -554,18 +566,18 @@ const Cron: React.FC<CronProps> = (props: { cronExpression: string, setCronExpre
                   <Radio style={radioStyle} value="period">
                     周期从
                     <InputNumber size="small" min={1} max={11} value={periodValue.month.min}
-                                 onChange={(e) => handlePeriodChange(e as number, 'month', 'min')} />
+                      onChange={(e) => handlePeriodChange(e as number, 'month', 'min')} />
                     -
                     <InputNumber size="small" min={2} max={12} value={periodValue.month.max}
-                                 onChange={(e) => handlePeriodChange(e as number, 'month', 'max')} />月
+                      onChange={(e) => handlePeriodChange(e as number, 'month', 'max')} />月
                   </Radio>
                   <Radio style={radioStyle} value="loop">
                     从
                     <InputNumber size="small" min={1} max={12} value={loopValue.month.start}
-                                 onChange={(e) => handleLoopChange(e as number, 'month', 'start')} />
+                      onChange={(e) => handleLoopChange(e as number, 'month', 'start')} />
                     月开始，每
                     <InputNumber size="small" min={1} max={12} value={loopValue.month.end}
-                                 onChange={(e) => handleLoopChange(e as number, 'month', 'end')} />
+                      onChange={(e) => handleLoopChange(e as number, 'month', 'end')} />
                     月执行一次
                   </Radio>
                   <Row>
