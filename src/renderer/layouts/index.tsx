@@ -1,5 +1,4 @@
 import { Flex, Layout, Spin } from 'antd'
-import { app} from 'electron'
 import React, { Suspense, useEffect,useState } from 'react'
 import RouterBeforeEach from '../router/RouterBeforeEach'
 import MyMenu from './MyMenu'

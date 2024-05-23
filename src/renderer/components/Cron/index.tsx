@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { Input, InputNumber, Tabs, Radio, Row, Col, RadioChangeEvent, Card, Select } from 'antd'
 import { CheckboxValueType } from 'antd/lib/checkbox/Group'
 import classes from './index.module.scss'
-import { cronRunTime } from '@/renderer/utils/cronRunTime'
+// import { cronRunTime } from '@/renderer/utils/cronRunTime'
 import { CronProps, cronTimeEnum, LoopType, PeriodType, PointType, RadioType } from './type'
 // 发送消息的
 const { ipcRenderer } = window.electron
@@ -17,7 +17,6 @@ const radioStyle = {
 
 const Cron: React.FC<CronProps> = (props: { cronExpression: string, setCronExpression: any }) => {
   const { cronExpression, setCronExpression } = props
-  console.log("cronExpression", cronExpression)
   // 单选 选择执行类型
   const [radioValue, setRadioValue] = useState<RadioType>({
     second: 1,
@@ -219,7 +218,6 @@ const Cron: React.FC<CronProps> = (props: { cronExpression: string, setCronExpre
 
     const cronTextCreate = `${second} ${minute} ${hour} ${day} ${month} ${week}`
 
-    console.log(cronTextCreate, "哈哈哈")
     // 设置cron
     setCronExpression(cronTextCreate)
 

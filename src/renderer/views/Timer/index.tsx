@@ -2,7 +2,7 @@ import { Card, Space } from 'antd'
 import React, { useEffect, useState } from 'react'
 import FileTable from '@/renderer/components/FileTable'
 import Cron from '@/renderer/components/Cron'
-import { time } from 'console'
+// import { time } from 'console'
 
 // 发送消息的
 const { ipcRenderer } = window.electron
@@ -15,10 +15,8 @@ const Timer: React.FC = () => {
     ipcRenderer.on('config-loaded', (_event, arg) => {
       let timer = arg['timer']
       const logConfig = arg['logConfig']
-      console.log("timers", timer)
       setValue(timer)
       setDataSource(logConfig)
-      console.log('渲染进程收到的消息', arg,"===", arg['timer'], '===',value)
     })
     // 向主进程发送消息，请求获取定时计划的配置信息
     ipcRenderer.send('config-loaded', JSON.stringify({ command: 'getConfigFile' }))
