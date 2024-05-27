@@ -1,10 +1,10 @@
 import React, { useState } from 'react'
 import {
-  SettingOutlined,
-  ColumnWidthOutlined,
+  // SettingOutlined,
+  // ColumnWidthOutlined,
   FieldTimeOutlined,
   SearchOutlined,
-  AppstoreOutlined
+  // AppstoreOutlined
 } from '@ant-design/icons'
 import type { MenuProps } from 'antd'
 import { Input, Menu } from 'antd'
@@ -14,25 +14,25 @@ import { useNavigate } from 'react-router-dom'
 const items: MenuProps['items'] = [
   {
     key: '/timer',
-    label: '日志配置',
+    label: '配置管理',
     icon: <FieldTimeOutlined />
   },
-  {
-    key: '/exception',
-    label: '日志异常分析',
-    icon: <ColumnWidthOutlined />
-  },
-  {
-    key: '/updater',
-    label: '软件更新',
-    icon: <AppstoreOutlined />
-  },
-  {
-    label: '更多',
-    title: '更多',
-    key: 'more',
-    icon: <SettingOutlined />
-  }
+  // {
+  //   key: '/exception',
+  //   label: '日志异常分析',
+  //   icon: <ColumnWidthOutlined />
+  // },
+  // {
+  //   key: '/updater',
+  //   label: '软件更新',
+  //   icon: <AppstoreOutlined />
+  // },
+  // {
+  //   label: '更多',
+  //   title: '更多',
+  //   key: 'more',
+  //   icon: <SettingOutlined />
+  // }
 ]
 
 const MyMenu: React.FC = () => {

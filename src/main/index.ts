@@ -180,7 +180,7 @@ app.whenReady().then(() => {
   ipcMain.on('read-resultTime', (_event) => {
     let data: any;
     const filePath = path.join(app.getPath('userData'), 'log-clean-store.json')
-    console.log("store.json", filePath)
+    // console.log("store.json", filePath)
     try {
       data = JSON.parse(fs.readFileSync(filePath, 'utf-8'))
     } catch (err) {
@@ -195,8 +195,6 @@ app.whenReady().then(() => {
       mainWindow.webContents.send('read-resultTime-result', data.resultTime == undefined ? [] : data.resultTime)
     }
   })
-
-
 
 
   // 接收渲染进程发送的存储配置信息的消息

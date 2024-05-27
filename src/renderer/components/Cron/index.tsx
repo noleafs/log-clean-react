@@ -227,6 +227,7 @@ const Cron: React.FC<CronProps> = (props: { cronExpression: string, setCronExpre
 
   // 获取运行结果
   ipcRenderer.on('read-resultTime-result', (_event, arg) => {
+    setResultTime([])
     setResultTime(arg)
   })
 

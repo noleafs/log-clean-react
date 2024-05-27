@@ -1,7 +1,7 @@
 {
   "name": "log-clean",
   "version": "1.0.0",
-  "description": "日志清理",
+  "description": "服务日志清理工具",
   "main": "./out/main/index.js",
   "author": "home.ydyksoft.cn",
   "homepage": "https://electron-vite.org",
