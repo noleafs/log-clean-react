@@ -13,6 +13,7 @@ import { existsSync } from 'node:fs'
 let job: schedule.Job
 
 var mainWindow;
+let isQuitting;
 function createWindow(): BrowserWindow {
   // Create the browser window.
   mainWindow = new BrowserWindow({
@@ -41,7 +42,6 @@ function createWindow(): BrowserWindow {
 
   // 关闭窗口时触发
   let tray;
-  let isQuitting
   mainWindow.on('close', (event) => {
   //  let childWindow = new BrowserWindow({
   //     width: 400,
@@ -223,6 +223,23 @@ app.whenReady().then(() => {
     // dock icon is clicked and there are no other windows open.
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
   })
+
+  
+  const gotTheLock = app.requestSingleInstanceLock();
+  if (!gotTheLock) {
+    // 如果获取到了单例锁，说明已经有一个应用实例在运行，当前应用将退出
+    dialog.showMessageBox({
+      type: 'info',
+      title: '提示',
+      message: '程序已在运行，请勿重复启动',
+      buttons: ['确定']
+    }).then(() => {
+      mainWindow.destroy();
+      app.quit();
+    });
+    isQuitting = true;
+    mainWindow.hide();
+  } 
 })
 
 // Quit when all windows are closed, except on macOS. There, it's common

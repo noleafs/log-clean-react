@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import {
-  // SettingOutlined,
+  SettingOutlined,
   // ColumnWidthOutlined,
   FieldTimeOutlined,
   SearchOutlined,
@@ -27,12 +27,12 @@ const items: MenuProps['items'] = [
   //   label: '软件更新',
   //   icon: <AppstoreOutlined />
   // },
-  // {
-  //   label: '更多',
-  //   title: '更多',
-  //   key: 'more',
-  //   icon: <SettingOutlined />
-  // }
+  {
+    label: '更多',
+    title: '更多',
+    key: 'more',
+    icon: <SettingOutlined />
+  }
 ]
 
 const MyMenu: React.FC = () => {
