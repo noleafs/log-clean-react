@@ -435,9 +435,6 @@ function saveResultTime(store) {
     } catch (err) {
       result = { resultTime: [] }
     }
-    if (result == undefined || result.length == 0 || result.resultTime == undefined) {
-      result = saveStore(store);
-    }
   }
 
   if (result != undefined && result != null && result.resultTime != undefined) {
@@ -485,22 +482,21 @@ function saveConfig(config: any): any {
 function loadConfig() {
   const configPath = path.join(app.getPath('userData'), 'config.json')
   try {
-
     const data = fs.readFileSync(configPath, 'utf-8')
-
     return JSON.parse(data)
   } catch (error) {
     // 生成一个默认的配置文件
     const defaultConfig = {
       // 默认时间为 周日 晚上凌晨两点删除
       timer: '0 0 2 ? * 1',
+      // timer: '* * * * * *',
       logConfig: [
         {
           key: '0',
-          logPath: 'D:\log',
+          logPath: 'D:\\log',
           saveTime: '1',
           // 默认当前时间
-          datetime: moment().format('YYYY-MM-DD'),
+          datetime: moment().format('yyyy-MM-DD HH:mm:ss'),
           containDir: true
         }
       ]
@@ -512,15 +508,19 @@ function loadConfig() {
 
 
 
-
+let jobLastTime;
 /**
  * 待执行的任务
  * @param config
  */
 function scheduleJob(config: any) {
   return () => {
-    console.log('执行了一次定时任务，执行时间是：', formatDate(new Date()) )
-    saveResultTime({ resultTime: [formatDate(new Date())] })
+    if(jobLastTime != undefined && jobLastTime === formatDate(new Date())) {
+       return;
+    }
+    jobLastTime = formatDate(new Date());
+    // console.log('执行了一次定时任务，执行时间是：',  Date.now(), formatDate(new Date()), job.name)
+    saveResultTime({ resultTime: [jobLastTime] })
     if (config && config.timer && config.logConfig && config.logConfig.length > 0) {
       // 需要执行的定时任务，根据配置删除指定文件夹下的内容
       for (let i = 0, len = config.logConfig.length; i < len; i++) {
@@ -532,6 +532,7 @@ function scheduleJob(config: any) {
         traverseFolder(logPath, logPath, containDir, time)
       }
     }
+
   }
 }
 
