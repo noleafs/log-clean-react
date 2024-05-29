@@ -495,8 +495,8 @@ function loadConfig() {
           key: '0',
           logPath: 'D:\\log',
           saveTime: '1',
-          // 默认当前时间
-          datetime: moment().format('yyyy-MM-DD HH:mm:ss'),
+          // 默认保留一个月内的
+          datetime: moment().subtract(1, 'months').format('yyyy-MM-DD HH:mm:ss'),
           containDir: true
         }
       ]
