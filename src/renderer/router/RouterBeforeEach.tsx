@@ -7,7 +7,7 @@ const RouterBeforeEach: React.FC = () => {
   const location = useLocation()
 
   useEffect(() => {
-    console.log(location.pathname)
+    console.log("当前路由",location.pathname)
   }, [location])
 
   useEffect(() => {

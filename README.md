@@ -11,26 +11,26 @@ An Electron application with React and TypeScript
 ### Install
 
 ```bash
-$ yarn
+$ pnpm install
 ```
 
 ### Development
 
 ```bash
-$ yarn dev
+$ pnpm run dev
 ```
 
 ### Build
 
 ```bash
 # For windows
-$ yarn build:win
+$ pnpm run build:win
 
 # For macOS
-$ yarn build:mac
+$ pnpm run build:mac
 
 # For Linux
-$ yarn build:linux
+$ pnpm run build:linux
 ```
 
 一个用于配置定时清除指定文件夹日志的工具

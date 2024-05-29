@@ -1,4 +1,4 @@
-import { app, shell, BrowserWindow, ipcMain, dialog, Tray, Menu, nativeImage } from 'electron'
+import { app, shell, BrowserWindow, ipcMain, dialog, Tray, Menu, nativeImage,powerMonitor } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
@@ -25,6 +25,7 @@ function createWindow(): BrowserWindow {
     // icon: path.join(__dirname, './resource/icon.png'),
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
+      // devTools: false,
       contextIsolation: false,
       preload: join(__dirname, '../preload/index.js'),
       sandbox: false
@@ -217,7 +218,6 @@ app.whenReady().then(() => {
   let config = loadConfig()
   job = schedule.scheduleJob(config.timer, scheduleJob(config))
 
-
   app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.
@@ -239,8 +239,26 @@ app.whenReady().then(() => {
     });
     isQuitting = true;
     mainWindow.hide();
-  } 
+  }
+
+  // 系统睡眠
+  powerMonitor.on('suspend', () => {
+    // console.log('系统进入睡眠状态');
+    if (job) {
+      job.cancel()
+    }
+   
+  });
+
+  // 系统唤醒
+  powerMonitor.on('resume', () => {
+    // console.log('系统唤醒');
+    let config = loadConfig()
+    job = schedule.scheduleJob(config.timer, scheduleJob(config))
+  });
+
 })
+
 
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits
@@ -474,11 +492,12 @@ function loadConfig() {
   } catch (error) {
     // 生成一个默认的配置文件
     const defaultConfig = {
-      timer: '  1 * * *',
+      // 默认时间为 周日 晚上凌晨两点删除
+      timer: '0 0 2 ? * 1',
       logConfig: [
         {
           key: '0',
-          logPath: '/home/jt/log',
+          logPath: 'D:\log',
           saveTime: '1',
           // 默认当前时间
           datetime: moment().format('YYYY-MM-DD'),
@@ -492,13 +511,15 @@ function loadConfig() {
 }
 
 
+
+
 /**
  * 待执行的任务
  * @param config
  */
 function scheduleJob(config: any) {
   return () => {
-    // console.log('执行了一次定时任务，执行时间是：', formatDate(new Date()))
+    console.log('执行了一次定时任务，执行时间是：', formatDate(new Date()) )
     saveResultTime({ resultTime: [formatDate(new Date())] })
     if (config && config.timer && config.logConfig && config.logConfig.length > 0) {
       // 需要执行的定时任务，根据配置删除指定文件夹下的内容
@@ -509,7 +530,6 @@ function scheduleJob(config: any) {
         // 需要将时间进行转换
         const time = new Date(datetime)
         traverseFolder(logPath, logPath, containDir, time)
-
       }
     }
   }
