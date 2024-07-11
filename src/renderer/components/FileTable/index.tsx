@@ -172,7 +172,6 @@ const EditableCell: React.FC<EditableCellProps> = ({
       input = ''
       break
   }
-
   if (editable) {
     childNode = editing ? (
       <Form.Item
@@ -194,7 +193,6 @@ const EditableCell: React.FC<EditableCellProps> = ({
       </div>
     )
   }
-
   return <td {...restProps}>{childNode}</td>
 }
 
@@ -272,6 +270,11 @@ const FileTable: React.FC<FileTableProps> = (props: FileTableProps) => {
       width: '10%',
       editable: true,
       inputType: 'checkbox',
+      // render: (_, record) => 
+      //   <Checkbox
+      //       defaultChecked={record.containDir}  onChange={(e) => handleCheckboxChange(record.key, e.target.checked)}/>
+    
+      // render: (_, record) =>  <Checkbox defaultChecked={record.containDir} />
       render: (_, record) =>
         record.containDir ? <span style={{ color: 'green' }}>是</span> : <span>否</span>
     },
@@ -327,6 +330,7 @@ const FileTable: React.FC<FileTableProps> = (props: FileTableProps) => {
     if (!col.editable) {
       return col
     }
+    // console.log("col",col)
     return {
       ...col,
       onCell: (record: DataType) => ({
@@ -351,7 +355,7 @@ const FileTable: React.FC<FileTableProps> = (props: FileTableProps) => {
           存储
         </Button>
       </Space>
-      <Table
+      <Table  
         scroll={{ y: 240 }}
         components={components}
         rowClassName={() => 'editable-row'}

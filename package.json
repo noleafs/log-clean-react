@@ -65,5 +65,8 @@
     "sass": "1.75.0",
     "typescript": "5.3.3",
     "vite": "5.0.12"
+  },
+  "build": {
+    "productName": "服务日志清理工具"
   }
 }
